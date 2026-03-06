@@ -30,7 +30,7 @@ $form.MaximizeBox     = $false
 $form.GetType().GetProperty("DoubleBuffered",[System.Reflection.BindingFlags]"Instance,NonPublic").SetValue($form,$true,$null)
 
 try {
-    $iconUrl    = "https://raw.githubusercontent.com/diamondclass/Near-SS/refs/heads/main/58224ef09abe1a0b4a4e35fc32c477fb.webp"
+    $iconUrl    = "https://raw.githubusercontent.com/diamondclass/Near-SS/refs/heads/main/nearss.webp"
     $wc         = New-Object System.Net.WebClient
     $wc.Headers.Add("User-Agent","Mozilla/5.0")
     $iconBytes  = $wc.DownloadData($iconUrl)
@@ -1453,6 +1453,7 @@ $timer.Start()
 
 [void]$form.ShowDialog()
 $timer.Stop()
+
 
 
 
