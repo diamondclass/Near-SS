@@ -494,7 +494,7 @@ function Get-BrowserHistoryScan {
     "vape\.gg", "drip\.gg", "slinky\.gg", "doomsdayclient\.com",
     "rusherhack\.org", "sigma-client\.com", "inertiaclient\.com",
     "meteorclient\.com", "liquidbounce\.net", "aristois\.net",
-    "zeroday\.gg", "autoclicker\.io", "stringcleaner\.xyz"."gayporn","porno gay"
+    "zeroday\.gg", "autoclicker\.io", "stringcleaner\.xyz"."gayporn"
     )
     $browsers = @(
         @{ name="Chrome";          path="$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History";                 tmp="$env:TEMP\nss_ch_hist"   },
@@ -1453,6 +1453,7 @@ $timer.Start()
 
 [void]$form.ShowDialog()
 $timer.Stop()
+
 
 
 
