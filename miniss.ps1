@@ -1098,7 +1098,7 @@ $btnScan.Add_Click({
                   "exodus","slinkyhook","jitter","butterfly","autoclick","clicking",
                   "sparkcrack","striker","monolith","unicorn client","uwu client",
                   "sapphire","lithiumclient","dream-injector","Registry Cleaner", "Wise")
-    $bamExempt = @("cheatbreaker","cheat engine uninstall","cheat engine setup","string")
+    $bamExempt = @("cheatbreaker","cheat engine uninstall","cheat engine setup","string","Reduct","MemReduct")
     $bamWarn = $false
     $userSIDs = Get-ChildItem $bamPath -ErrorAction SilentlyContinue
     foreach ($sid in $userSIDs) {
@@ -1138,7 +1138,7 @@ $btnScan.Add_Click({
     } else { Add-ModuleData "hosts" "ok" "No active entries in hosts file." }
     Advance "Scanning installed apps..."
     $targetApps = @(
-        "Wise Folder Hider","USBOblivion","BulkFileChanger","CCleaner",
+        "Wise Folder Hider","USBOblivion","BulkFileChanger","CCleaner","Reduct","MemReduct",
         "SystemInformer","ProcessHacker","Autoruns","TCPView","Injector","Loader"
         "Everything","PrivaZer","Eraser","Bleachbit","SDelete","Wise","Registry","Cleaner","String"
     )
@@ -1453,6 +1453,7 @@ $timer.Start()
 
 [void]$form.ShowDialog()
 $timer.Stop()
+
 
 
 
