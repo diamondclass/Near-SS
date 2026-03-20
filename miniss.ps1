@@ -3,19 +3,19 @@ Add-Type -AssemblyName System.Drawing
 
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-$bg0      = [System.Drawing.Color]::FromArgb(7,   11,  20)
-$bg1      = [System.Drawing.Color]::FromArgb(11,  18,  34)
-$bg2      = [System.Drawing.Color]::FromArgb(16,  26,  50)
-$accent   = [System.Drawing.Color]::FromArgb(30,  120, 255)
-$accentHi = [System.Drawing.Color]::FromArgb(80,  160, 255)
-$accentGlow = [System.Drawing.Color]::FromArgb(15, 55,  130)
-$accentDim  = [System.Drawing.Color]::FromArgb(20, 40,  90)
-$warn     = [System.Drawing.Color]::FromArgb(255, 75,  75)
-$warnSoft = [System.Drawing.Color]::FromArgb(255, 160, 50)
-$ok       = [System.Drawing.Color]::FromArgb(35,  205, 120)
-$dimText  = [System.Drawing.Color]::FromArgb(80,  110, 160)
-$white    = [System.Drawing.Color]::FromArgb(210, 228, 255)
-$sectionBg = [System.Drawing.Color]::FromArgb(9,  15,  30)
+$bg0        = [System.Drawing.Color]::FromArgb(7,   11,  20)
+$bg1        = [System.Drawing.Color]::FromArgb(11,  18,  34)
+$bg2        = [System.Drawing.Color]::FromArgb(16,  26,  50)
+$accent     = [System.Drawing.Color]::FromArgb(30,  120, 255)
+$accentHi   = [System.Drawing.Color]::FromArgb(80,  160, 255)
+$accentGlow = [System.Drawing.Color]::FromArgb(15,  55,  130)
+$accentDim  = [System.Drawing.Color]::FromArgb(20,  40,  90)
+$warn       = [System.Drawing.Color]::FromArgb(255, 75,  75)
+$warnSoft   = [System.Drawing.Color]::FromArgb(255, 160, 50)
+$ok         = [System.Drawing.Color]::FromArgb(35,  205, 120)
+$dimText    = [System.Drawing.Color]::FromArgb(80,  110, 160)
+$white      = [System.Drawing.Color]::FromArgb(210, 228, 255)
+$sectionBg  = [System.Drawing.Color]::FromArgb(9,   15,  30)
 
 $form = New-Object Windows.Forms.Form
 $form.Text            = "NearScreensharing Tool"
@@ -39,8 +39,8 @@ try {
     $iconHandle = $iconBitmap.GetHicon()
     $form.Icon  = [System.Drawing.Icon]::FromHandle($iconHandle)
 } catch {
-    $form.Icon  = [System.Drawing.SystemIcons]::Shield
-    $iconBytes  = $null
+    $form.Icon = [System.Drawing.SystemIcons]::Shield
+    $iconBytes = $null
 }
 
 $form.Add_Paint({
@@ -66,7 +66,7 @@ $form.Controls.Add($lblTitle)
 $lblTitle.Location = New-Object System.Drawing.Point([int](($form.ClientSize.Width - $lblTitle.Width) / 2), 72)
 
 $lblSub = New-Object Windows.Forms.Label
-$lblSub.Text      = "by diamondclass  -  Version Beta 0.1.0"
+$lblSub.Text      = "by diamondclass  -  Version 1.0.0"
 $lblSub.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
 $lblSub.ForeColor = $dimText
 $lblSub.BackColor = [System.Drawing.Color]::Transparent
@@ -81,7 +81,7 @@ $btnScan.Font      = New-Object System.Drawing.Font("Segoe UI", 10, [System.Draw
 $btnScan.ForeColor = $white
 $btnScan.BackColor = $accent
 $btnScan.FlatStyle = "Flat"
-$btnScan.FlatAppearance.BorderSize  = 0
+$btnScan.FlatAppearance.BorderSize = 0
 $btnScan.Size      = New-Object System.Drawing.Size(140, 40)
 $btnScan.Location  = New-Object System.Drawing.Point([int](($form.ClientSize.Width - 140) / 2), 185)
 $btnScan.Cursor    = [System.Windows.Forms.Cursors]::Hand
@@ -191,279 +191,35 @@ $btnSSTool.Add_MouseEnter({ $btnSSTool.BackColor = [System.Drawing.Color]::FromA
 $btnSSTool.Add_MouseLeave({ $btnSSTool.BackColor = [System.Drawing.Color]::FromArgb(16, 65, 145) })
 $panelDone.Controls.Add($btnSSTool)
 
+$script:scanLog        = New-Object System.Text.StringBuilder
+$script:reportPath     = ""
+$script:totalSteps     = 22
+$script:step           = 0
+$script:mcInfoGlobal   = @{ running=$false; version="Unknown"; client="Unknown"; memory=""; threads=0; startTime=""; jvmArgs=""; mods=@() }
+$script:moduleResults  = @{}
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-[System.Windows.Forms.Application]::EnableVisualStyles()
-
-$bg0      = [System.Drawing.Color]::FromArgb(7,   11,  20)
-$bg1      = [System.Drawing.Color]::FromArgb(11,  18,  34)
-$bg2      = [System.Drawing.Color]::FromArgb(16,  26,  50)
-$accent   = [System.Drawing.Color]::FromArgb(30,  120, 255)
-$accentHi = [System.Drawing.Color]::FromArgb(80,  160, 255)
-$accentGlow = [System.Drawing.Color]::FromArgb(15, 55,  130)
-$accentDim  = [System.Drawing.Color]::FromArgb(20, 40,  90)
-$warn     = [System.Drawing.Color]::FromArgb(255, 75,  75)
-$warnSoft = [System.Drawing.Color]::FromArgb(255, 160, 50)
-$ok       = [System.Drawing.Color]::FromArgb(35,  205, 120)
-$dimText  = [System.Drawing.Color]::FromArgb(80,  110, 160)
-$white    = [System.Drawing.Color]::FromArgb(210, 228, 255)
-$sectionBg = [System.Drawing.Color]::FromArgb(9,  15,  30)
-
-$form = New-Object Windows.Forms.Form
-$form.Text            = "NearScreensharing Tool"
-$form.Size            = New-Object System.Drawing.Size(480, 300)
-$form.MinimumSize     = New-Object System.Drawing.Size(480, 300)
-$form.MaximumSize     = New-Object System.Drawing.Size(480, 300)
-$form.StartPosition   = "CenterScreen"
-$form.BackColor       = $bg0
-$form.ForeColor       = $white
-$form.FormBorderStyle = "FixedSingle"
-$form.MaximizeBox     = $false
-$form.GetType().GetProperty("DoubleBuffered",[System.Reflection.BindingFlags]"Instance,NonPublic").SetValue($form,$true,$null)
-
-try {
-    $iconUrl    = "https://raw.githubusercontent.com/diamondclass/Near-SS/refs/heads/main/58224ef09abe1a0b4a4e35fc32c477fb.webp"
-    $wc         = New-Object System.Net.WebClient
-    $wc.Headers.Add("User-Agent","Mozilla/5.0")
-    $iconBytes  = $wc.DownloadData($iconUrl)
-    $iconStream = New-Object System.IO.MemoryStream(,$iconBytes)
-    $iconBitmap = New-Object System.Drawing.Bitmap($iconStream)
-    $iconHandle = $iconBitmap.GetHicon()
-    $form.Icon  = [System.Drawing.Icon]::FromHandle($iconHandle)
-} catch {
-    $form.Icon  = [System.Drawing.SystemIcons]::Shield
-    $iconBytes  = $null
+function Add-ModuleData($key, $type, $msg, $label="") {
+    if (-not $script:moduleResults.ContainsKey($key)) { $script:moduleResults[$key] = [System.Collections.Generic.List[object]]::new() }
+    $script:moduleResults[$key].Add([pscustomobject]@{type=$type; msg=$msg; label=$label})
 }
 
-$form.Add_Paint({
-    param($s,$e)
-    $g = $e.Graphics
-    $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(22,40,80), 1)
-    $g.DrawRectangle($pen, 0, 0, $form.ClientSize.Width - 1, $form.ClientSize.Height - 1)
-    $pen.Dispose()
-    $accentPen = New-Object System.Drawing.Pen($accent, 2)
-    $g.DrawLine($accentPen, 0, $form.ClientSize.Height - 2, $form.ClientSize.Width, $form.ClientSize.Height - 2)
-    $g.DrawLine($accentPen, 0, 1, $form.ClientSize.Width, 1)
-    $accentPen.Dispose()
-})
-
-$lblTitle = New-Object Windows.Forms.Label
-$lblTitle.Text      = "NearScreensharing"
-$lblTitle.Font      = New-Object System.Drawing.Font("Segoe UI", 22, [System.Drawing.FontStyle]::Bold)
-$lblTitle.ForeColor = $white
-$lblTitle.BackColor = [System.Drawing.Color]::Transparent
-$lblTitle.AutoSize  = $true
-$lblTitle.Location  = New-Object System.Drawing.Point(0, 72)
-$form.Controls.Add($lblTitle)
-$lblTitle.Location = New-Object System.Drawing.Point([int](($form.ClientSize.Width - $lblTitle.Width) / 2), 72)
-
-$lblSub = New-Object Windows.Forms.Label
-$lblSub.Text      = "by diamondclass  -  Version Beta 0.1.0"
-$lblSub.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
-$lblSub.ForeColor = $dimText
-$lblSub.BackColor = [System.Drawing.Color]::Transparent
-$lblSub.AutoSize  = $true
-$lblSub.Location  = New-Object System.Drawing.Point(0, 130)
-$form.Controls.Add($lblSub)
-$lblSub.Location = New-Object System.Drawing.Point([int](($form.ClientSize.Width - $lblSub.Width) / 2), 108)
-
-$btnScan = New-Object Windows.Forms.Button
-$btnScan.Text      = "Scan"
-$btnScan.Font      = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$btnScan.ForeColor = $white
-$btnScan.BackColor = $accent
-$btnScan.FlatStyle = "Flat"
-$btnScan.FlatAppearance.BorderSize  = 0
-$btnScan.Size      = New-Object System.Drawing.Size(140, 40)
-$btnScan.Location  = New-Object System.Drawing.Point([int](($form.ClientSize.Width - 140) / 2), 158)
-$btnScan.Cursor    = [System.Windows.Forms.Cursors]::Hand
-$btnScan.Add_MouseEnter({ $btnScan.BackColor = $accentHi })
-$btnScan.Add_MouseLeave({ $btnScan.BackColor = $accent   })
-$form.Controls.Add($btnScan)
-
-$progressBg = New-Object Windows.Forms.Panel
-$progressBg.Location  = New-Object System.Drawing.Point(40, 158)
-$progressBg.Size      = New-Object System.Drawing.Size(400, 8)
-$progressBg.BackColor = [System.Drawing.Color]::FromArgb(16, 26, 50)
-$progressBg.Visible   = $false
-$form.Controls.Add($progressBg)
-
-$progressBar = New-Object Windows.Forms.Panel
-$progressBar.Location  = New-Object System.Drawing.Point(0, 0)
-$progressBar.Size      = New-Object System.Drawing.Size(0, 8)
-$progressBar.BackColor = $accent
-$progressBg.Controls.Add($progressBar)
-
-$progressBg.Add_Paint({
-    param($s,$e)
-    $pen2 = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(22,40,80),1)
-    $e.Graphics.DrawRectangle($pen2, 0, 0, $progressBg.Width-1, $progressBg.Height-1)
-    $pen2.Dispose()
-})
-
-$lblStep = New-Object Windows.Forms.Label
-$lblStep.Text      = ""
-$lblStep.Font      = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Regular)
-$lblStep.ForeColor = $dimText
-$lblStep.BackColor = [System.Drawing.Color]::Transparent
-$lblStep.AutoSize  = $false
-$lblStep.Size      = New-Object System.Drawing.Size(400, 18)
-$lblStep.Location  = New-Object System.Drawing.Point(40, 172)
-$lblStep.TextAlign = "MiddleCenter"
-$lblStep.Visible   = $false
-$form.Controls.Add($lblStep)
-
-$lblPct = New-Object Windows.Forms.Label
-$lblPct.Text      = ""
-$lblPct.Font      = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
-$lblPct.ForeColor = $accentHi
-$lblPct.BackColor = [System.Drawing.Color]::Transparent
-$lblPct.AutoSize  = $false
-$lblPct.Size      = New-Object System.Drawing.Size(400, 16)
-$lblPct.Location  = New-Object System.Drawing.Point(40, 140)
-$lblPct.TextAlign = "MiddleCenter"
-$lblPct.Visible   = $false
-$form.Controls.Add($lblPct)
-
-$panelDone = New-Object Windows.Forms.Panel
-$panelDone.Location  = New-Object System.Drawing.Point(0, 130)
-$panelDone.Size      = New-Object System.Drawing.Size(480, 130)
-$panelDone.BackColor = [System.Drawing.Color]::Transparent
-$panelDone.Visible   = $false
-$form.Controls.Add($panelDone)
-
-$lblDoneIcon = New-Object Windows.Forms.Label
-$lblDoneIcon.Text      = "[OK]"
-$lblDoneIcon.Font      = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
-$lblDoneIcon.ForeColor = $ok
-$lblDoneIcon.BackColor = [System.Drawing.Color]::Transparent
-$lblDoneIcon.AutoSize  = $true
-$lblDoneIcon.Location  = New-Object System.Drawing.Point(0, 0)
-$panelDone.Controls.Add($lblDoneIcon)
-$lblDoneIcon.Location = New-Object System.Drawing.Point([int](($panelDone.Width - $lblDoneIcon.Width) / 2), 0)
-
-$lblDoneMsg = New-Object Windows.Forms.Label
-$lblDoneMsg.Text      = ""
-$lblDoneMsg.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
-$lblDoneMsg.ForeColor = $dimText
-$lblDoneMsg.BackColor = [System.Drawing.Color]::Transparent
-$lblDoneMsg.AutoSize  = $false
-$lblDoneMsg.Size      = New-Object System.Drawing.Size(440, 32)
-$lblDoneMsg.Location  = New-Object System.Drawing.Point(20, 36)
-$lblDoneMsg.TextAlign = "MiddleCenter"
-$panelDone.Controls.Add($lblDoneMsg)
-
-$btnOpenFolder = New-Object Windows.Forms.Button
-$btnOpenFolder.Text      = "Abrir en Explorer"
-$btnOpenFolder.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-$btnOpenFolder.ForeColor = $white
-$btnOpenFolder.BackColor = [System.Drawing.Color]::FromArgb(14, 50, 100)
-$btnOpenFolder.FlatStyle = "Flat"
-$btnOpenFolder.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(30, 80, 160)
-$btnOpenFolder.FlatAppearance.BorderSize  = 1
-$btnOpenFolder.Size      = New-Object System.Drawing.Size(170, 34)
-$btnOpenFolder.Location  = New-Object System.Drawing.Point(50, 76)
-$btnOpenFolder.Cursor    = [System.Windows.Forms.Cursors]::Hand
-$btnOpenFolder.Add_MouseEnter({ $btnOpenFolder.BackColor = [System.Drawing.Color]::FromArgb(20,70,140) })
-$btnOpenFolder.Add_MouseLeave({ $btnOpenFolder.BackColor = [System.Drawing.Color]::FromArgb(14,50,100) })
-$panelDone.Controls.Add($btnOpenFolder)
-
-$btnSSTool = New-Object Windows.Forms.Button
-$btnSSTool.Text      = "SS Alliance Tool"
-$btnSSTool.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-$btnSSTool.ForeColor = $white
-$btnSSTool.BackColor = [System.Drawing.Color]::FromArgb(16, 65, 145)
-$btnSSTool.FlatStyle = "Flat"
-$btnSSTool.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(30, 100, 200)
-$btnSSTool.FlatAppearance.BorderSize  = 1
-$btnSSTool.Size      = New-Object System.Drawing.Size(170, 34)
-$btnSSTool.Location  = New-Object System.Drawing.Point(260, 76)
-$btnSSTool.Cursor    = [System.Windows.Forms.Cursors]::Hand
-$btnSSTool.Add_MouseEnter({ $btnSSTool.BackColor = [System.Drawing.Color]::FromArgb(25, 90, 190) })
-$btnSSTool.Add_MouseLeave({ $btnSSTool.BackColor = [System.Drawing.Color]::FromArgb(16, 65, 145) })
-$panelDone.Controls.Add($btnSSTool)
-
-$script:scanLog     = New-Object System.Text.StringBuilder
-$script:reportPath  = ""
-$script:totalSteps  = 21
-$script:step        = 0
-
-function Write-Out($text, $color) { [void]$script:scanLog.Append($text) }
-function Write-Header($title) {
-    Write-Out "`n  +---------------------------------------------------------------+`n" $null
-    Write-Out "  |  $($title.PadRight(62))|`n" $null
-    Write-Out "  +---------------------------------------------------------------+`n" $null
-}
-function Write-Ok($text)          { Write-Out "    [OK]   $text`n" $null }
-function Write-Warn($text)        { Write-Out "    [WARN] $text`n" $null }
-function Write-Alert($text)       { Write-Out "    [HIT]  $text`n" $null }
-function Write-Info($label,$value){ Write-Out "    $($label.PadRight(24))$value`n" $null }
-function Get-StatusString($flag)  { if ($flag) { return "warn" } else { return "ok" } }
+function Write-Out($text, $color)   { [void]$script:scanLog.Append($text) }
+function Write-Header($title)       { Write-Out "`n  +---------------------------------------------------------------+`n" $null; Write-Out "  |  $($title.PadRight(62))|`n" $null; Write-Out "  +---------------------------------------------------------------+`n" $null }
+function Write-Ok($text)            { Write-Out "    [OK]   $text`n" $null }
+function Write-Warn($text)          { Write-Out "    [WARN] $text`n" $null }
+function Write-Alert($text)         { Write-Out "    [HIT]  $text`n" $null }
+function Write-Info($label,$value)  { Write-Out "    $($label.PadRight(24))$value`n" $null }
+function Get-StatusString($flag)    { if ($flag) { return "warn" } else { return "ok" } }
 function Set-ModuleStatus($key,$state) {}
-
-function Advance($msg) {
-    $script:step++
-    $pct  = [Math]::Min(100, [int](($script:step / $script:totalSteps) * 100))
-    $newW = [int](400 * $pct / 100)
-    $progressBar.Width = $newW
-    $lblStep.Text      = $msg
-    $lblPct.Text       = "$pct%"
-    [System.Windows.Forms.Application]::DoEvents()
-}
-
-$script:moduleResults = @{}
-function Add-ModuleData {
-    param($module, $type, $label, $value)
-    if (-not $script:moduleResults.ContainsKey($module)) {
-        $script:moduleResults[$module] = New-Object System.Collections.Generic.List[PSObject]
-    }
-    $script:moduleResults[$module].Add([PSCustomObject]@{
-        type  = $type
-        label = $label
-        value = $value
-    })
-}
-
-$recordingSoftwares = @{
-    "obs"               = "OBS Studio"
-    "obs64"             = "OBS Studio (64-bit)"
-    "streamlabs"        = "Streamlabs OBS"
-    "xsplit"            = "XSplit"
-    "bandicam"          = "Bandicam"
-    "fraps"             = "Fraps"
-    "dxtory"            = "Dxtory"
-    "action"            = "Mirillis Action!"
-    "medal"             = "Medal.tv"
-    "plays"             = "Plays.tv"
-    "outplayed"         = "Outplayed"
-    "nvsphelper64"      = "NVIDIA ShadowPlay Helper"
-    "shadowplay"        = "NVIDIA ShadowPlay"
-    "nvcontainer"       = "NVIDIA Container (ShadowPlay)"
-    "gamebarftsvc"      = "Xbox Game Bar (FT Service)"
-    "gamebar"           = "Xbox Game Bar"
-    "xboxgamebar"       = "Xbox Game Bar App"
-    "gamingservices"    = "Xbox Gaming Services"
-    "geckomonitor"      = "NVIDIA GeForce Experience Monitor"
-    "gameoverlayui"     = "Steam Game Overlay"
-    "icecreamrecorder"  = "Icecream Screen Recorder"
-    "flashbackrecorder" = "Flashback Recorder"
-    "overwolf"          = "Overwolf (Overlay/Recorder)"
-    "parsec"            = "Parsec Remote Desktop"
-}
 
 function Get-PSHistoryScan {
     $historyFile = (Get-PSReadLineOption).HistorySavePath
     if (Test-Path $historyFile) {
-        $commands = Get-Content $historyFile -Tail 50
+        $commands = Get-Content $historyFile -Tail 100
         $commands | Out-File "$env:TEMP\pshistory_debug.txt"
-
         foreach ($cmd in $commands) {
             $trimmed = $cmd.Trim()
-            if ($trimmed) {
-                Add-ModuleData "pshistory" "info" $trimmed "Command"
-            }
+            if ($trimmed) { Add-ModuleData "pshistory" "info" $trimmed "Command" }
         }
         return $true
     }
@@ -472,22 +228,18 @@ function Get-PSHistoryScan {
 
 function Get-VMDetection {
     $vmVendors = @("vmware","virtualbox","vbox","qemu","xen","hyper-v","hyperv","parallels","innotek","bochs","kvm","bhyve","microsoft hv","virtio")
-
     $cs        = Get-WmiObject Win32_ComputerSystem -ErrorAction SilentlyContinue
     $bios      = Get-WmiObject Win32_BIOS -ErrorAction SilentlyContinue
     $board     = Get-WmiObject Win32_BaseBoard -ErrorAction SilentlyContinue
     $gpu       = Get-WmiObject Win32_VideoController -ErrorAction SilentlyContinue
-
     $fields = @(
         if ($cs)    { $cs.Manufacturer;    $cs.Model }
         if ($bios)  { $bios.Manufacturer;  $bios.SMBIOSBIOSVersion; $bios.Version }
         if ($board) { $board.Manufacturer; $board.Product }
         if ($gpu)   { foreach ($g in $gpu) { $g.Name; $g.AdapterCompatibility } }
     ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-
     $seen    = @{}
     $vmFound = $false
-
     foreach ($field in $fields) {
         $lower = $field.ToLower()
         foreach ($kw in $vmVendors) {
@@ -498,7 +250,6 @@ function Get-VMDetection {
             }
         }
     }
-
     $vmRegKeys = @(
         "HKLM:\SOFTWARE\VMware, Inc.\VMware Tools",
         "HKLM:\SOFTWARE\Oracle\VirtualBox Guest Additions",
@@ -512,7 +263,6 @@ function Get-VMDetection {
             $vmFound = $true
         }
     }
-
     $vmProcs = @("vmtoolsd","vmwaretray","vmwareuser","vboxservice","vboxtray","vmsrvc","vmusrvc","vmacthlp")
     $active  = Get-Process -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name | ForEach-Object { $_.ToLower() }
     foreach ($vp in $vmProcs) {
@@ -521,9 +271,107 @@ function Get-VMDetection {
             $vmFound = $true
         }
     }
-
     if (-not $vmFound) { Add-ModuleData "vm" "ok" "No VM indicators detected." }
     return $vmFound
+}
+
+function Get-MouseInfo {
+    $found = $false
+    try {
+        $devices = Get-WmiObject Win32_PointingDevice -ErrorAction Stop |
+                   Where-Object { $_.Name -notmatch "(?i)virtual|remote|touchpad|trackpad|vmware|vbox" }
+        foreach ($d in $devices) {
+            $hwid  = $d.PNPDeviceID
+            $brand = "Unknown"
+            if ($hwid -match "VID_([0-9A-Fa-f]{4})") {
+                $vid   = $matches[1].ToUpper()
+                $brand = switch ($vid) {
+                    "046D" { "Logitech" }
+                    "1532" { "Razer" }
+                    "1038" { "SteelSeries" }
+                    "04F2" { "SteelSeries" }
+                    "1B1C" { "Corsair" }
+                    "04B4" { "Corsair" }
+                    "258A" { "SinoWealth / Redragon" }
+                    "1BCF" { "Marvo / PixArt OEM" }
+                    "0458" { "KYE / Genius" }
+                    "0E8F" { "GreenAsia / Newmen" }
+                    "093A" { "PixArt" }
+                    "25A7" { "Areson / Fude&Hope" }
+                    "18F8" { "Holtek" }
+                    "04D9" { "Holtek / Rapoo" }
+                    "045E" { "Microsoft" }
+                    "0C45" { "Microdia" }
+                    "1D57" { "Xenta / Unifying" }
+                    "16C0" { "Van Ooijen (custom/DIY)" }
+                    "0B05" { "ASUS / ROG" }
+                    "3367" { "Thermaltake / Tt eSports" }
+                    "2516" { "Cooler Master" }
+                    "0461" { "Primax Electronics" }
+                    "1A2C" { "China Industry Support" }
+                    "24AE" { "Shenzhen Rapoo" }
+                    "248A" { "Maxxter / Gembird" }
+                    "1C4F" { "SiGma Micro" }
+                    "15D9" { "Trust International" }
+                    "0E6A" { "Megawin / Alienware OEM" }
+                    "04CA" { "Lite-On" }
+                    "17EF" { "Lenovo" }
+                    "04F3" { "Elan Microelectronics" }
+                    "10C4" { "Silicon Labs" }
+                    "0416" { "Winbond" }
+                    "3938" { "MOSART Semiconductor" }
+                    "0557" { "ATEN" }
+                    "0A5C" { "Broadcom" }
+                    "2B89" { "KFA2 / Galax" }
+                    "0D9F" { "Compucase / CM Storm" }
+                    "256F" { "3Dconnexion" }
+                    "1D5C" { "Fresco Logic" }
+                    "0BDA" { "Realtek" }
+                    "046E" { "Behavior Tech (BTC)" }
+                    "04E8" { "Samsung" }
+                    "0CF3" { "Qualcomm Atheros" }
+                    "2B2F" { "A4Tech" }
+                    "09DA" { "A4Tech" }
+                    default { "VID:$vid" }
+                }
+            }
+            $pid_str = ""
+            if ($hwid -match "PID_([0-9A-Fa-f]{4})") { $pid_str = $matches[1].ToUpper() }
+            $display = if ($pid_str) { "$($d.Name)  [$brand | PID:$pid_str]" } else { "$($d.Name)  [$brand]" }
+            Add-ModuleData "mouse" "info" $display "WMI"
+            $found = $true
+        }
+    } catch {}
+
+    if (-not $found) {
+        try {
+            $pnp = Get-PnpDevice -Class Mouse -Status OK -ErrorAction Stop |
+                   Where-Object { $_.FriendlyName -notmatch "(?i)virtual|HID-compliant|remote|vbox|vmware" }
+            foreach ($p in $pnp) {
+                Add-ModuleData "mouse" "info" $p.FriendlyName "PnP"
+                $found = $true
+            }
+        } catch {}
+    }
+
+    if (-not $found) {
+        try {
+            $hidPath = "HKLM:\SYSTEM\CurrentControlSet\Enum\HID"
+            Get-ChildItem $hidPath -ErrorAction SilentlyContinue | ForEach-Object {
+                Get-ChildItem $_.PSPath -ErrorAction SilentlyContinue | ForEach-Object {
+                    $devInfo = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+                    if ($devInfo -and $devInfo.DeviceDesc -match "(?i)mouse|pointer|pointing") {
+                        $desc = ($devInfo.DeviceDesc -split ";")[-1].Trim()
+                        Add-ModuleData "mouse" "info" $desc "HID Registry"
+                        $found = $true
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    if (-not $found) { Add-ModuleData "mouse" "warn" "No physical mouse detected or info unavailable." }
+    return $found
 }
 
 function Get-BootTime {
@@ -545,19 +393,18 @@ function Get-BootTime {
 function Get-BrowserHistoryScan {
     param($bootTime)
     $historyFound = $false
-    # solo dominios
     $keywords = @(
-    "vape\.gg", "drip\.gg", "slinky\.gg", "doomsdayclient\.com",
-    "rusherhack\.org", "sigma-client\.com", "inertiaclient\.com",
-    "meteorclient\.com", "liquidbounce\.net", "aristois\.net",
-    "zeroday\.gg", "autoclicker\.io", "stringcleaner\.xyz","gayporn\.xxx"
+        "vape\.gg", "drip\.gg", "slinky\.gg", "doomsdayclient\.com",
+        "rusherhack\.org", "sigma-client\.com", "inertiaclient\.com",
+        "meteorclient\.com", "liquidbounce\.net", "aristois\.net",
+        "zeroday\.gg", "autoclicker\.io", "stringcleaner\.xyz","gayporn\.xxx"
     )
     $browsers = @(
-        @{ name="Chrome";          path="$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History";                 tmp="$env:TEMP\nss_ch_hist"   },
-        @{ name="Chrome P1";       path="$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\History";               tmp="$env:TEMP\nss_ch_p1"     },
-        @{ name="Edge";            path="$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\History";                tmp="$env:TEMP\nss_edge_hist"  },
-        @{ name="Brave";           path="$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\History";   tmp="$env:TEMP\nss_brave_hist" },
-        @{ name="Firefox";         path="";                                                                          tmp="$env:TEMP\nss_ff_hist"   }
+        @{ name="Chrome";    path="$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History";               tmp="$env:TEMP\nss_ch_hist"   },
+        @{ name="Chrome P1"; path="$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\History";             tmp="$env:TEMP\nss_ch_p1"     },
+        @{ name="Edge";      path="$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\History";              tmp="$env:TEMP\nss_edge_hist"  },
+        @{ name="Brave";     path="$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\History"; tmp="$env:TEMP\nss_brave_hist" },
+        @{ name="Firefox";   path="";                                                                        tmp="$env:TEMP\nss_ff_hist"   }
     )
     $ffBase = "$env:APPDATA\Mozilla\Firefox\Profiles"
     if (Test-Path $ffBase) {
@@ -606,76 +453,61 @@ function Get-JavawMemoryScan {
 
 function Get-MinecraftInfo {
     param($pIDProcess)
-
-    $info = @{ 
-        running=$false; version="Unknown"; client="Vanilla"; 
-        jvmArgs=""; cmdLine=""; mods=@(); pid=$pIDProcess; 
-        startTime=""; memory=""; threads=0 
+    $info = @{
+        running=$false; version="Unknown"; client="Vanilla";
+        jvmArgs=""; cmdLine=""; mods=@(); pid=$pIDProcess;
+        startTime=""; memory=""; threads=0
     }
-
     if (-not $pIDProcess) { return $info }
-
     try {
         $proc = Get-Process -Id $pIDProcess -ErrorAction Stop
         $info.running   = $true
         $info.startTime = $proc.StartTime.ToString('yyyy-MM-dd HH:mm:ss')
         $info.memory    = "$([Math]::Round($proc.WorkingSet64/1MB,1)) MB"
         $info.threads   = $proc.Threads.Count
-        
         $winTitle = $proc.MainWindowTitle
         $wmiMC = Get-WmiObject Win32_Process -Filter "ProcessId = $pIDProcess" -ErrorAction Stop
-        
         if ($wmiMC -and $wmiMC.CommandLine) {
             $cmd = $wmiMC.CommandLine
             $info.cmdLine = $cmd
-
             if ($cmd -match "lunar" -or $winTitle -match "Lunar") {
                 $info.client = "Lunar Client"
                 if ($cmd -match "--version\s+([\d\.]+)") { $info.version = $matches[1] }
-            }
-            elseif ($cmd -match "badlion" -or $winTitle -match "Badlion") {
+            } elseif ($cmd -match "badlion" -or $winTitle -match "Badlion") {
                 $info.client = "Badlion Client"
                 if ($cmd -match "version\s+([\d\.]+)") { $info.version = $matches[1] }
-            }
-            elseif ($cmd -match "salwyrr" -or $winTitle -match "Salwyrr") {
+            } elseif ($cmd -match "salwyrr" -or $winTitle -match "Salwyrr") {
                 $info.client = "Salwyrr Launcher"
-            }
-            elseif ($cmd -match "feather" -or $winTitle -match "Feather") {
+            } elseif ($cmd -match "feather" -or $winTitle -match "Feather") {
                 $info.client = "Feather Client"
-            }
-            elseif ($cmd -match "labymod" -or $winTitle -match "LabyMod") {
+            } elseif ($cmd -match "labymod" -or $winTitle -match "LabyMod") {
                 $info.client = "LabyMod"
+            } elseif ($cmd -match "forge") {
+                $info.client = "Minecraft Forge"
+            } elseif ($cmd -match "fabric") {
+                $info.client = "Fabric"
             }
-            elseif ($cmd -match "forge") { $info.client = "Minecraft Forge" }
-            elseif ($cmd -match "fabric") { $info.client = "Fabric" }
-
             if ($info.version -eq "Unknown") {
                 $verMatch = [regex]::Match($cmd, '(?i)[\\/]versions[\\/]([\d\.]+)')
-                if ($verMatch.Success) { 
-                    $info.version = $verMatch.Groups[1].Value 
-                }
-                elseif ($winTitle -match "1\.8\.\d+|1\.7\.\d+|1\.1[2-9]\.\d+|1\.2[0-9]\.\d+") {
+                if ($verMatch.Success) {
+                    $info.version = $verMatch.Groups[1].Value
+                } elseif ($winTitle -match "1\.8\.\d+|1\.7\.\d+|1\.1[2-9]\.\d+|1\.2[0-9]\.\d+") {
                     $info.version = $matches[0]
-                }
-                elseif ($cmd -match "-Dminecraft\.version=([\d\.]+)") {
+                } elseif ($cmd -match "-Dminecraft\.version=([\d\.]+)") {
                     $info.version = $matches[1]
                 }
             }
-
             $modMatches = [regex]::Matches($cmd, 'mods[\\/]([^\\/\s"]+\.jar)')
             foreach ($m in $modMatches) { $info.mods += $m.Groups[1].Value }
-
             $xmxMatch = [regex]::Match($cmd, '-Xmx(\d+[gGmM])')
             if ($xmxMatch.Success) { $info.jvmArgs = "-Xmx$($xmxMatch.Groups[1].Value)" }
         }
     } catch {
         $info.running = $false
     }
-
     return $info
 }
 
-# Definición de Win32 para capturar ventanas específicas
 $win32Code = @"
 using System;
 using System.Runtime.InteropServices;
@@ -700,7 +532,6 @@ function Take-Screenshot {
     try {
         $handle = [IntPtr]::Zero
         $javaProcesses = Get-Process -Name "javaw" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero }
-        
         if ($javaProcesses) {
             $targetProc = $javaProcesses | Where-Object { $_.Id -eq $pIDProcess } | Select-Object -First 1
             if (-not $targetProc) { $targetProc = $javaProcesses | Select-Object -First 1 }
@@ -710,17 +541,14 @@ function Take-Screenshot {
             $procById = Get-Process -Id $pIDProcess -ErrorAction SilentlyContinue
             if ($procById) { $handle = $procById.MainWindowHandle }
         }
-        if ($handle -eq [IntPtr]::Zero) {
-            $handle = [Win32]::GetForegroundWindow()
-        }
-
+        if ($handle -eq [IntPtr]::Zero) { $handle = [Win32]::GetForegroundWindow() }
         $rect = New-Object Win32+RECT
         if ($handle -ne [IntPtr]::Zero -and [Win32]::GetWindowRect($handle, [ref]$rect)) {
-            $width = $rect.Right - $rect.Left
+            $width  = $rect.Right - $rect.Left
             $height = $rect.Bottom - $rect.Top
             if ($width -gt 200 -and $height -gt 200) {
                 $bmp = New-Object System.Drawing.Bitmap($width, $height)
-                $g = [System.Drawing.Graphics]::FromImage($bmp)
+                $g   = [System.Drawing.Graphics]::FromImage($bmp)
                 $g.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
                 $g.Dispose()
             }
@@ -728,19 +556,16 @@ function Take-Screenshot {
         if ($null -eq $bmp) {
             $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
             $bmp = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
-            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g   = [System.Drawing.Graphics]::FromImage($bmp)
             $g.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
             $g.Dispose()
         }
-
         $ms = New-Object System.IO.MemoryStream
         $bmp.Save($ms, [System.Drawing.Imaging.ImageFormat]::Jpeg)
         $bytes = $ms.ToArray()
         $ms.Dispose(); $bmp.Dispose()
         return [Convert]::ToBase64String($bytes)
-    } catch { 
-        return "" 
-    }
+    } catch { return "" }
 }
 
 function Export-HtmlReport {
@@ -773,6 +598,7 @@ function Export-HtmlReport {
     if ($screenshotB64 -and $screenshotB64.Length -gt 100) {
         $ssHtml = "<section id=`"screenshot`"><h2 class=`"sec-h`">Screen Capture</h2><div class=`"ss-wrap`"><img src=`"data:image/jpeg;base64,$screenshotB64`" class=`"ss-img`" /></div></section>"
     }
+
     $moduleIds = @(
         @{id="s01";num="01";title="Services"},
         @{id="s02";num="02";title="DNS Cache"},
@@ -785,24 +611,27 @@ function Export-HtmlReport {
         @{id="s09";num="09";title="Mod Times"},
         @{id="s10";num="10";title="JNativeHook"},
         @{id="s11";num="11";title="Exec + Deleted"},
-        @{id="s12";num="12";title="Shell:Recent"},
-        @{id="s13";num="13";title="Minecraft"},
-        @{id="s14";num="14";title="In-Instance"},
-        @{id="s15";num="15";title="Out-of-Instance"},
-        @{id="s16";num="16";title="Startup"},
-        @{id="s17";num="17";title="Alt Accounts"},
-        @{id="s18";num="18";title="AnyDesk"},
-        @{id="s19";num="19";title="Browser History (On or out instance)"},
-        @{id="s20";num="20";title="Heap Strings"}
-        @{id="s21";num="21";title="PS Command History"}
-        @{id="s22";num="22";title="VM Detection"}
+        @{id="s12";num="12";title="Minecraft"},
+        @{id="s13";num="13";title="In-Instance"},
+        @{id="s14";num="14";title="Out-of-Instance"},
+        @{id="s15";num="15";title="Startup"},
+        @{id="s16";num="16";title="Alt Accounts"},
+        @{id="s17";num="17";title="AnyDesk"},
+        @{id="s18";num="18";title="Browser History"},
+        @{id="s19";num="19";title="Heap Strings"},
+        @{id="s20";num="20";title="VM Detection"},
+        @{id="s21";num="21";title="Mouse Device"},
+        @{id="s22";num="22";title="Shell:Recent"},
+        @{id="s23";num="23";title="PS Command History"}
     )
 
-    $moduleKeys = @("services","dns","usb","bam","hosts","apps","prefetch","recording",
-                    "modtimes","jnative","execdel","recent","minecraft","ininst","outinst",
-                    "startup","alts","anydesk","browser","heap","pshistory","vm")
+    $moduleKeys = @(
+        "services","dns","usb","bam","hosts","apps","prefetch","recording",
+        "modtimes","jnative","execdel","minecraft","ininst","outinst",
+        "startup","alts","anydesk","browser","heap","vm","mouse","recent","pshistory"
+    )
 
-    $cardsHtml  = ""
+    $cardsHtml    = ""
     $sidebarLinks = ""
 
     for ($i = 0; $i -lt $moduleIds.Count; $i++) {
@@ -813,9 +642,9 @@ function Export-HtmlReport {
         $hasHit  = $items | Where-Object { $_.type -eq "hit" }
         $hasWarn = $items | Where-Object { $_.type -eq "warn" }
 
-        if ($hasHit)        { $sc="#ff4040"; $sl="HIT";  $sbClass="hit"  }
-        elseif ($hasWarn)   { $sc="#ff9820"; $sl="WARN"; $sbClass="warn" }
-        else                { $sc="#1ec870"; $sl="OK";   $sbClass="ok"   }
+        if ($hasHit)      { $sc="#ff4040"; $sl="HIT";  $sbClass="hit"  }
+        elseif ($hasWarn) { $sc="#ff9820"; $sl="WARN"; $sbClass="warn" }
+        else              { $sc="#1ec870"; $sl="OK";   $sbClass="ok"   }
 
         $rowsHtml = ""
         if ($items.Count -eq 0) {
@@ -836,7 +665,16 @@ function Export-HtmlReport {
             }
         }
 
-        $cardsHtml += "<div class=`"mod-card`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$($mod.num)</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body`">$rowsHtml</div></div>`n"
+        $isExpandable = ($key -eq "recent" -or $key -eq "pshistory")
+
+        if ($isExpandable) {
+            $entryCount  = $items.Count
+            $countLabel  = if ($entryCount -eq 1) { "1 entrada" } else { "$entryCount entradas" }
+            $placeholder = "<div class=`"expand-placeholder`"><div class=`"expand-placeholder-info`"><span class=`"expand-placeholder-count`">$countLabel</span><span class=`"expand-placeholder-hint`">Contenido oculto por privacidad</span></div><button class=`"expand-btn`" onclick=`"openModal('$($mod.id)','$($mod.title)')`">Mostrar completo</button></div>"
+            $cardsHtml += "<div class=`"mod-card expandable`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$($mod.num)</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body-hidden`" aria-hidden=`"true`">$rowsHtml</div>$placeholder</div>`n"
+        } else {
+            $cardsHtml += "<div class=`"mod-card`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$($mod.num)</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body`">$rowsHtml</div></div>`n"
+        }
         $sidebarLinks += "<a class=`"sb-link $sbClass`" onclick=`"scrollTo('$($mod.id)')`"><div class=`"sb-num`">$($mod.num)</div>$($mod.title)</a>`n"
     }
 
@@ -859,16 +697,13 @@ function Export-HtmlReport {
 }
 html,body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;height:100%;overflow:hidden;}
 body{display:flex;flex-direction:column;}
-
 .topbar{flex-shrink:0;background:linear-gradient(90deg,#0a1020,#06070d);border-bottom:2px solid var(--accent);padding:0 28px;height:54px;display:flex;align-items:center;gap:16px;}
 .tb-logo{font-size:16px;font-weight:700;color:var(--white);}
 .tb-logo span{color:var(--accent-hi);}
 .tb-sub{font-size:10px;color:var(--dim2);margin-top:1px;}
 .tb-badge{margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid;letter-spacing:.3px;}
 .tb-dot{width:6px;height:6px;border-radius:50%;}
-
 .main{display:flex;flex:1;overflow:hidden;}
-
 .sidebar{width:195px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
 .sb-head{padding:14px 14px 6px;font-size:9px;font-weight:700;color:var(--dim);letter-spacing:1.8px;text-transform:uppercase;}
 .sb-link{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:11.5px;color:var(--dim2);cursor:pointer;border-left:2px solid transparent;transition:all .12s;user-select:none;}
@@ -882,9 +717,7 @@ body{display:flex;flex-direction:column;}
 .sb-meta{margin-top:auto;border-top:1px solid var(--border);padding:12px 14px 16px;}
 .sb-mr{font-size:10px;color:var(--dim2);line-height:1.9;font-family:'JetBrains Mono',monospace;}
 .sb-mr b{color:var(--white);font-weight:500;}
-
 .content{flex:1;overflow-y:auto;padding:26px 30px 60px;}
-
 .hero{background:linear-gradient(135deg,#0b1222,#07080e);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:12px;padding:24px 26px;margin-bottom:26px;position:relative;overflow:hidden;}
 .hero::after{content:'';position:absolute;top:0;right:0;width:260px;height:100%;background:radial-gradient(ellipse at right,rgba(30,111,255,.08),transparent 70%);pointer-events:none;}
 .hero-title{font-size:20px;font-weight:700;margin-bottom:2px;}
@@ -896,10 +729,8 @@ body{display:flex;flex-direction:column;}
 .meta-v{font-size:11px;font-weight:500;color:var(--white);font-family:'JetBrains Mono',monospace;word-break:break-all;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;}
 .hero-bdot{width:7px;height:7px;border-radius:50%;}
-
 .sec-h{font-size:10px;font-weight:700;color:var(--dim2);letter-spacing:1.8px;text-transform:uppercase;margin:26px 0 13px;display:flex;align-items:center;gap:10px;}
 .sec-h::after{content:'';flex:1;height:1px;background:var(--border);}
-
 .mc-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:8px;}
 .mc-sr{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
 .mc-dot{width:8px;height:8px;border-radius:50%;}
@@ -911,7 +742,6 @@ body{display:flex;flex-direction:column;}
 .mods-lbl{font-size:9px;font-weight:600;color:var(--dim2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
 .tags{display:flex;flex-wrap:wrap;gap:5px;}
 .tag{background:rgba(30,111,255,.1);border:1px solid rgba(30,111,255,.22);border-radius:4px;padding:2px 7px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--accent-hi);}
-
 .mods-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .mod-card{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
 .mod-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card2);border-bottom:1px solid var(--border);}
@@ -931,20 +761,46 @@ body{display:flex;flex-direction:column;}
 .row-ok .row-msg{color:var(--dim2);}
 .row-lbl{flex-shrink:0;width:130px;font-size:10.5px;color:var(--dim2);font-family:'JetBrains Mono',monospace;}
 .row-val{font-size:10.5px;color:var(--white);font-family:'JetBrains Mono',monospace;word-break:break-all;}
-
 .ss-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;}
 .ss-img{width:100%;border-radius:6px;display:block;}
-
 .footer{flex-shrink:0;background:var(--bg1);border-top:1px solid var(--border);padding:12px 28px;display:flex;justify-content:space-between;font-size:10px;color:var(--dim);}
-
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:#0d1828;border-radius:3px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+.mod-body-hidden{display:none;}
+.mod-card.expandable .mod-hdr{cursor:default;}
+.expand-placeholder{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:12px;}
+.expand-placeholder-info{display:flex;flex-direction:column;gap:3px;}
+.expand-placeholder-count{font-size:11px;font-weight:600;color:var(--white);font-family:'JetBrains Mono',monospace;}
+.expand-placeholder-hint{font-size:10px;color:var(--dim2);}
+.expand-btn{flex-shrink:0;background:rgba(30,111,255,.1);border:1px solid rgba(30,111,255,.3);color:var(--accent-hi);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;padding:7px 16px;border-radius:7px;cursor:pointer;transition:all .15s;letter-spacing:.2px;}
+.expand-btn:hover{background:rgba(30,111,255,.22);border-color:var(--accent);color:#fff;}
+.modal-backdrop{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-backdrop.open{opacity:1;pointer-events:all;}
+.modal-blur{position:absolute;inset:0;background:rgba(4,6,14,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.modal-box{position:relative;z-index:1;width:min(780px,92vw);max-height:82vh;background:var(--bg1);border:1px solid rgba(30,111,255,.22);border-top:2px solid var(--accent);border-radius:14px;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(30,111,255,.08);transform:translateY(18px) scale(.97);transition:transform .22s cubic-bezier(.22,1,.36,1);}
+.modal-backdrop.open .modal-box{transform:translateY(0) scale(1);}
+.modal-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-title{font-size:13px;font-weight:700;color:var(--white);flex:1;}
+.modal-badge-wrap{display:flex;align-items:center;gap:8px;}
+.modal-count{font-size:10px;color:var(--dim2);font-family:'JetBrains Mono',monospace;}
+.modal-close{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--dim2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.modal-close:hover{background:rgba(255,64,64,.12);border-color:rgba(255,64,64,.3);color:#ff6060;}
+.modal-body{overflow-y:auto;padding:14px 18px 20px;display:flex;flex-direction:column;gap:3px;}
+.modal-body::-webkit-scrollbar{width:4px;}
+.modal-body::-webkit-scrollbar-track{background:transparent;}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(30,111,255,.25);border-radius:2px;}
+.modal-body::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+.modal-search-wrap{position:relative;padding:10px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-search-icon{position:absolute;left:30px;top:50%;transform:translateY(-50%);color:var(--dim2);font-size:12px;pointer-events:none;}
+.modal-search{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(30,111,255,.2);border-radius:7px;padding:7px 12px 7px 32px;color:var(--white);font-size:11.5px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;box-sizing:border-box;}
+.modal-search:focus{border-color:var(--accent);background:rgba(30,111,255,.06);}
+.modal-search::placeholder{color:var(--dim2);}
+.modal-no-results{padding:24px;text-align:center;color:var(--dim2);font-size:11px;font-style:italic;}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div>
     <div class="tb-logo">Near<span>Screensharing</span> Tool</div>
@@ -955,7 +811,6 @@ body{display:flex;flex-direction:column;}
     $badgeText
   </div>
 </div>
-
 <div class="main">
   <nav class="sidebar">
     <div class="sb-head">Modules</div>
@@ -968,7 +823,6 @@ body{display:flex;flex-direction:column;}
       <div class="sb-mr">Hits: <b style="color:$badgeColor;">$findings</b></div>
     </div>
   </nav>
-
   <main class="content" id="main-content">
     <div class="hero">
       <div class="hero-title">Near<span>Screensharing</span> Tool</div>
@@ -985,7 +839,6 @@ body{display:flex;flex-direction:column;}
         $badgeText
       </div>
     </div>
-
     <h2 class="sec-h">Minecraft Process</h2>
     <div class="mc-card">
       <div class="mc-sr">
@@ -1002,21 +855,33 @@ body{display:flex;flex-direction:column;}
       </div>
       $modsRow
     </div>
-
     $ssHtml
-
     <h2 class="sec-h">Scan Results</h2>
     <div class="mods-grid">
       $cardsHtml
     </div>
   </main>
 </div>
-
 <div class="footer">
   <span>NearScreensharing Tool &mdash; $scanDate &mdash; by diamondclass</span>
   <span>Confidential screenshare report</span>
 </div>
 
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-blur"></div>
+  <div class="modal-box" id="modal-box">
+    <div class="modal-hdr">
+      <span class="modal-title" id="modal-title"></span>
+      <span class="modal-count" id="modal-count"></span>
+      <button class="modal-close" onclick="closeModal()" title="Cerrar (Esc)">&#x2715;</button>
+    </div>
+    <div class="modal-search-wrap">
+      <span class="modal-search-icon">&#x2315;</span>
+      <input class="modal-search" id="modal-search" type="text" placeholder="Buscar..." oninput="filterModal(this.value)" autocomplete="off" spellcheck="false" />
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
 <script>
 function scrollTo(id){
   var el=document.getElementById(id);
@@ -1037,18 +902,58 @@ function scrollTo(id){
     });
   });
 })();
+function openModal(id,title){
+  var src=document.querySelector('#'+id+' .mod-body-hidden');
+  if(!src)return;
+  document.getElementById('modal-title').textContent=title;
+  var allRows=src.querySelectorAll('.row');
+  document.getElementById('modal-count').textContent=allRows.length+' entradas';
+  var body=document.getElementById('modal-body');
+  body.innerHTML=src.innerHTML;
+  var search=document.getElementById('modal-search');
+  search.value='';
+  var backdrop=document.getElementById('modal-backdrop');
+  backdrop.classList.add('open');
+  document.addEventListener('keydown',handleModalKey);
+  body.scrollTop=0;
+  setTimeout(function(){search.focus();},220);
+}
+function filterModal(q){
+  var body=document.getElementById('modal-body');
+  var rows=body.querySelectorAll('.row');
+  var term=q.trim().toLowerCase();
+  var visible=0;
+  rows.forEach(function(r){
+    var text=r.textContent.toLowerCase();
+    var match=!term||text.indexOf(term)!==-1;
+    r.style.display=match?'':'none';
+    if(match)visible++;
+  });
+  var noRes=body.querySelector('.modal-no-results');
+  if(noRes)noRes.remove();
+  if(term&&visible===0){
+    var d=document.createElement('div');
+    d.className='modal-no-results';
+    d.textContent='Sin resultados para "'+q+'"';
+    body.appendChild(d);
+  }
+  document.getElementById('modal-count').textContent=visible+' entradas'+(term?' (filtradas)':'');
+}
+function closeModal(){
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.removeEventListener('keydown',handleModalKey);
+}
+function closeModalOnBackdrop(e){
+  if(e.target===document.getElementById('modal-backdrop')||e.target.classList.contains('modal-blur')){closeModal();}
+}
+function handleModalKey(e){
+  if(e.key==='Escape')closeModal();
+  if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('modal-search').focus();}
+}
 </script>
 </body>
 </html>
 "@
-}
-
-$script:mcInfoGlobal  = @{ running=$false; version="Unknown"; client="Unknown"; memory=""; threads=0; startTime=""; jvmArgs=""; mods=@() }
-$script:moduleResults = @{}
-
-function Add-ModuleData($key, $type, $msg, $label="") {
-    if (-not $script:moduleResults.ContainsKey($key)) { $script:moduleResults[$key] = [System.Collections.Generic.List[object]]::new() }
-    $script:moduleResults[$key].Add([pscustomobject]@{type=$type; msg=$msg; label=$label})
 }
 
 $recordingSoftwares = @{
@@ -1077,19 +982,20 @@ $btnScan.Add_Click({
     $script:step = 0
     $script:mcPid = $null
 
-    $bootTime = Get-BootTime
-    $winUser  = [System.Environment]::UserName
-
     function Advance($msg) {
         $script:step++
-        $pct  = [Math]::Min(100,[int](($script:step / 21) * 100))
+        $pct  = [Math]::Min(100,[int](($script:step / 22) * 100))
         $progressBar.Width = [int](400 * $pct / 100)
         $lblStep.Text = $msg
         $lblPct.Text  = "$pct%"
         [System.Windows.Forms.Application]::DoEvents()
     }
+
+    $bootTime = Get-BootTime
+    $winUser  = [System.Environment]::UserName
+
     Advance "Checking services..."
-    $svcs = @("bam","sysmain","diagtrack","appinfo","dps","pcasvc","dusmsvc","PcaSvc")
+    $svcs    = @("bam","sysmain","diagtrack","appinfo","dps","pcasvc","dusmsvc","PcaSvc")
     $svcWarn = $false
     foreach ($s in $svcs) {
         $svc = Get-Service -Name $s -ErrorAction SilentlyContinue
@@ -1128,6 +1034,7 @@ $btnScan.Add_Click({
         }
     }
     if (-not $dnsFound) { Add-ModuleData "dns" "ok" "No suspicious domains in DNS cache." }
+
     Advance "Reading USB history..."
     $usbRoot = "HKLM:\SYSTEM\CurrentControlSet\Enum\USBSTOR"
     $usbKeys = Get-ChildItem $usbRoot -ErrorAction SilentlyContinue
@@ -1148,22 +1055,27 @@ $btnScan.Add_Click({
             }
         }
     } else { Add-ModuleData "usb" "ok" "No USB storage devices in registry." }
+
     Advance "Reading BAM logs..."
     $bamPath  = "Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings"
     $bamFlags = @("autoclicker","SystemInformer","processhacker","vape","drip","doomsday",
                   "inject","hook","sigma","wurst","meteor","rise","rusherhack","lambda",
-                  "registry.exe", "clicker", "Nvidia Control Panel", "slinky", "fileless",
+                  "registry.exe","clicker","Nvidia Control Panel","slinky","fileless",
                   "exodus","slinkyhook","jitter","butterfly","autoclick","clicking",
                   "sparkcrack","striker","monolith","unicorn client","uwu client",
-                  "sapphire","lithiumclient","dream-injector","Registry Cleaner", "Wise")
+                  "sapphire","lithiumclient","dream-injector","Registry Cleaner","Wise",
+                  "ccleaner","bleachbit","privazer","glary","auslogics","advancedsystemcare",
+                  "cleanmgr","eraser","wipefile","sdelete","fileshredder","hardwipe","killdisk",
+                  "freeraser","moo0","cipher","nswiper","ultrawipefile","fcleaner","slimcleaner",
+                  "ashampoo","iobit","iobits","treesize","windirstat","spacesniffer","drivewipe")
     $bamExempt = @("cheatbreaker","cheat engine uninstall","cheat engine setup","string","Reduct","MemReduct")
-    $bamWarn = $false
-    $userSIDs = Get-ChildItem $bamPath -ErrorAction SilentlyContinue
+    $bamWarn   = $false
+    $userSIDs  = Get-ChildItem $bamPath -ErrorAction SilentlyContinue
     foreach ($sid in $userSIDs) {
         $key = Get-Item $sid.PSPath -ErrorAction SilentlyContinue
         if (-not $key) { continue }
         foreach ($valName in $key.GetValueNames()) {
-            $lower = $valName.ToLower()
+            $lower    = $valName.ToLower()
             $isExempt = $false
             foreach ($ex in $bamExempt) { if ($lower -match $ex) { $isExempt = $true; break } }
             if ($isExempt) { continue }
@@ -1187,6 +1099,7 @@ $btnScan.Add_Click({
         }
     }
     if (-not $bamWarn) { Add-ModuleData "bam" "ok" "No flagged executables in BAM logs." }
+
     Advance "Checking hosts file..."
     $hostsEntries = Get-Content "C:\Windows\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue |
                     Where-Object { $_ -notlike "#*" -and $_ -match "\S" }
@@ -1194,33 +1107,42 @@ $btnScan.Add_Click({
         foreach ($l in $hostsEntries) { Add-ModuleData "hosts" "warn" $l }
         $findings++
     } else { Add-ModuleData "hosts" "ok" "No active entries in hosts file." }
+
     Advance "Scanning installed apps..."
     $targetApps = @(
         "Wise Folder Hider","USBOblivion","BulkFileChanger","CCleaner","Reduct","MemReduct",
-        "SystemInformer","ProcessHacker","Autoruns","TCPView","Injector","Loader"
+        "SystemInformer","ProcessHacker","Autoruns","TCPView","Injector","Loader",
         "Everything","PrivaZer","Eraser","Bleachbit","SDelete","Wise","Registry","Cleaner","String"
     )
-    $regPaths = @("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
-                  "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
-                  "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*")
+    $regPaths = @(
+        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    )
     $appWarn = $false
     foreach ($app in $targetApps) {
-        $found = $false
+        $found2 = $false
         foreach ($rp in $regPaths) {
-            if (Get-ItemProperty $rp -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match "(?i)$([regex]::Escape($app))" }) { $found = $true; break }
+            if (Get-ItemProperty $rp -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match "(?i)$([regex]::Escape($app))" }) { $found2 = $true; break }
         }
-        if ($found) { Add-ModuleData "apps" "hit" "Installed: $app"; $findings++; $appWarn = $true }
+        if ($found2) { Add-ModuleData "apps" "hit" "Installed: $app"; $findings++; $appWarn = $true }
     }
     if (-not $appWarn) { Add-ModuleData "apps" "ok" "No suspicious applications detected." }
+
     Advance "Reading prefetch..."
     $pfTargets = $targetApps + @("SparkCrack","Striker","autoclicker","autoclick","jitter","butterfly",
                                   "slinkyhook","slinky","exodus","vape","drip","dreaminjector","monolith",
                                   "unicorn","uwuclient","sapphire","lithium","stringcleaner","ghostclient",
-                                  "nitrobrew","reflexclient","crystalclient","blevclient","exitus","String",
-                                  "peinjector","xanon","zerodayclient","SystemInformer","ProcessHacker","Wise","Clicker","Cleaner")
+                                  "nitrobrew","reflexclient","crystalclient","blevclient","exitus",
+                                  "peinjector","xanon","zerodayclient","SystemInformer","ProcessHacker",
+                                  "CCleaner","CCleaner64","BleachBit","PrivaZer","GlaryUtilities","Glary",
+                                  "Auslogics","AdvSystemCare","AdvancedSystemCare","Eraser","WipeFile",
+                                  "SDelete","FileShredder","Moo0FileShredder","FreeRaser","HardWipe",
+                                  "KillDisk","SlimCleaner","FCleaner","DriveWipe","nswiper","CipherWipe",
+                                  "Wise","WiseCare","WiseDisk","WiseRegistry","CleanMgr","DiskCleanup")
     $pfWarn = $false
     foreach ($app in $pfTargets) {
-        $clean = $app -replace '[^a-zA-Z0-9]',''
+        $clean   = $app -replace '[^a-zA-Z0-9]',''
         $pfItems = Get-ChildItem "C:\Windows\Prefetch" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "(?i)$clean" }
         foreach ($pf in $pfItems) {
             if ($pf.LastWriteTime -gt $bootTime) {
@@ -1233,6 +1155,7 @@ $btnScan.Add_Click({
         }
     }
     if (-not $pfWarn) { Add-ModuleData "prefetch" "ok" "No suspicious prefetch entries found." }
+
     Advance "Checking recording software..."
     $runningProcs = ((Get-Process -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ProcessName) -join " ").ToLower()
     $recWarn = $false
@@ -1240,6 +1163,7 @@ $btnScan.Add_Click({
         if ($runningProcs -match $kv.Key) { Add-ModuleData "recording" "hit" "Running: $($kv.Value)"; $findings++; $recWarn = $true }
     }
     if (-not $recWarn) { Add-ModuleData "recording" "ok" "No recording software detected." }
+
     Advance "Reading modification times..."
     try {
         $SID = (Get-WmiObject Win32_UserAccount | Where-Object { $_.Name -eq $winUser } | Select-Object -First 1).SID
@@ -1259,10 +1183,35 @@ $btnScan.Add_Click({
         }
     } catch {}
     try { $exp = Get-Process explorer -ErrorAction SilentlyContinue | Select-Object -First 1; if ($exp) { Add-ModuleData "modtimes" "info" $exp.StartTime.ToString('yyyy-MM-dd HH:mm:ss') "Explorer start" } } catch {}
-    try { $tmpMod = (Get-Item $env:TEMP -ErrorAction SilentlyContinue).LastWriteTime; if ($tmpMod) { Add-ModuleData "modtimes" "info" $tmpMod.ToString('yyyy-MM-dd HH:mm:ss') "Temp folder" } } catch {}
     Add-ModuleData "modtimes" "info" $bootTime.ToString('yyyy-MM-dd HH:mm:ss') "System boot"
+
+    $foldersToCheck = @(
+        @{ label="%%TEMP%%";        path=$env:TEMP },
+        @{ label="%%LOCALAPPDATA%%\Temp"; path="$env:LOCALAPPDATA\Temp" },
+        @{ label="C:\Windows\Temp"; path="C:\Windows\Temp" },
+        @{ label="C:\Windows\Prefetch"; path="C:\Windows\Prefetch" }
+    )
+    foreach ($fc in $foldersToCheck) {
+        try {
+            $fi = Get-Item $fc.path -ErrorAction Stop
+            $modTime = $fi.LastWriteTime
+            Add-ModuleData "modtimes" "info" $modTime.ToString('yyyy-MM-dd HH:mm:ss') "$($fc.label) last modified"
+            if ($modTime -gt $bootTime) {
+                $itemCount = (Get-ChildItem $fc.path -ErrorAction SilentlyContinue | Measure-Object).Count
+                $threshold = if ($fc.path -match "Prefetch") { 15 } else { 5 }
+                $countStr  = "$itemCount items"
+                if ($itemCount -le $threshold) {
+                    Add-ModuleData "modtimes" "hit" "$($fc.label) modified this session AND nearly empty [$countStr] - possible wipe  [$($modTime.ToString('HH:mm:ss'))]"
+                    $findings++
+                } else {
+                    Add-ModuleData "modtimes" "warn" "$($fc.label) modified this session [$($modTime.ToString('HH:mm:ss'))]  [$countStr]"
+                }
+            }
+        } catch {}
+    }
+
     Advance "Checking JNativeHook..."
-    $jFound = $false; $jSeen = @{}
+    $jFound   = $false; $jSeen = @{}
     $jPatterns = @("*JNativeHook*","*slinkyhook*","*slinky_library*","*nativehook*","*rawkeyboard*","*jkey*","*jinput*")
     foreach ($tp in @($env:LOCALAPPDATA + "\Temp", $env:TEMP) | Sort-Object -Unique) {
         if (-not (Test-Path $tp)) { continue }
@@ -1285,32 +1234,26 @@ $btnScan.Add_Click({
         }
     }
     if (-not $jFound) { Add-ModuleData "jnative" "ok" "No JNativeHook artifacts found." }
+
     Advance "Checking executed and deleted files..."
     try {
         $rfCache = "C:\Windows\AppCompat\Programs\RecentFileCache.bcf"
         if (Test-Path $rfCache) {
-            $raw2 = [System.IO.File]::ReadAllBytes($rfCache)
-            $text2 = [System.Text.Encoding]::Unicode.GetString($raw2)
-            $lines2 = $text2 -split "`0" | Where-Object { $_ -like "*.exe" }
+            $raw2        = [System.IO.File]::ReadAllBytes($rfCache)
+            $text2       = [System.Text.Encoding]::Unicode.GetString($raw2)
+            $lines2      = $text2 -split "`0" | Where-Object { $_ -like "*.exe" }
             $deletedExes = $lines2 | Where-Object { -not (Test-Path $_) }
             foreach ($d in $deletedExes | Select-Object -First 20) { Add-ModuleData "execdel" "hit" "Deleted EXE: $d"; $findings++ }
             if (-not $deletedExes) { Add-ModuleData "execdel" "ok" "No deleted executables found in RecentFileCache." }
         } else { Add-ModuleData "execdel" "ok" "RecentFileCache not present on this system." }
     } catch { Add-ModuleData "execdel" "ok" "Could not read AppCompat data." }
-    Advance "Enumerating Shell:Recent..."
-    $recentPath  = [System.Environment]::GetFolderPath("Recent")
-    $recentFiles = Get-ChildItem $recentPath -ErrorAction SilentlyContinue |
-                   Where-Object { $_.Extension -ne ".ini" -and $_.LastWriteTime -gt $bootTime } |
-                   Sort-Object LastWriteTime -Descending
-    if ($recentFiles) {
-        foreach ($rf in $recentFiles) { Add-ModuleData "recent" "info" $rf.LastWriteTime.ToString('HH:mm:ss') $rf.BaseName }
-    } else { Add-ModuleData "recent" "ok" "No files opened in Shell:Recent since boot." }
+
     Advance "Finding Minecraft..."
     $javaProcs = Get-Process -Name "javaw" -ErrorAction SilentlyContinue
     if ($javaProcs) {
         $jp = $javaProcs | Select-Object -First 1
         $script:mcPid = $jp.Id
-        $mcDetailed = Get-MinecraftInfo -pIDProcess $jp.Id
+        $mcDetailed   = Get-MinecraftInfo -pIDProcess $jp.Id
         $script:mcInfoGlobal = $mcDetailed
         Add-ModuleData "minecraft" "info" $jp.Id "PID"
         Add-ModuleData "minecraft" "info" $jp.StartTime.ToString('yyyy-MM-dd HH:mm:ss') "Start time"
@@ -1328,6 +1271,7 @@ $btnScan.Add_Click({
         $script:mcInfoGlobal = @{ running=$false; version="N/A"; client="N/A"; memory="N/A"; threads=0; startTime="N/A"; jvmArgs=""; mods=@() }
         Add-ModuleData "minecraft" "warn" "No javaw.exe found. Minecraft not running."
     }
+
     Advance "Running in-instance checks..."
     if ($script:mcPid) {
         $flagged = @{
@@ -1353,10 +1297,11 @@ $btnScan.Add_Click({
         } catch {}
         if (-not $inWarn) { Add-ModuleData "ininst" "ok" "No flagged strings in Minecraft process args." }
     } else { Add-ModuleData "ininst" "warn" "Skipped - Minecraft not running." }
+
     Advance "Running out-of-instance checks..."
     $suspDlls = @("inject","vape","slinky","slinkyhook","exodus","dream","jnativehook","sparkcrack","striker","unicorn","lithium","dream-injector","ghostclient","nitrobrew","peinjector","xanon")
-    $oWarn = $false
-    $dpsSvc = Get-WmiObject Win32_Process -Filter "Name='svchost.exe'" -ErrorAction SilentlyContinue | Select-Object -First 1
+    $oWarn    = $false
+    $dpsSvc   = Get-WmiObject Win32_Process -Filter "Name='svchost.exe'" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($dpsSvc) {
         try {
             $modules = (Get-Process -Id $dpsSvc.ProcessId -ErrorAction SilentlyContinue).Modules
@@ -1369,18 +1314,20 @@ $btnScan.Add_Click({
         } catch {}
     }
     if (-not $oWarn) { Add-ModuleData "outinst" "ok" "No flagged modules found in svchost." }
+
     Advance "Checking startup entries..."
     $startupWarn = $false
     foreach ($sf in @([System.Environment]::GetFolderPath("Startup"),[System.Environment]::GetFolderPath("CommonStartup"))) {
         if (-not (Test-Path $sf)) { continue }
         foreach ($item in (Get-ChildItem $sf -ErrorAction SilentlyContinue | Where-Object { $_.Extension -ne ".ini" })) {
-            $ts = $item.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')
+            $ts    = $item.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')
             $extra = if ($item.LastWriteTime -gt $bootTime) { " - THIS SESSION" } else { "" }
             Add-ModuleData "startup" "hit" "$($item.Name)  [$ts]$extra"
             $findings++; $startupWarn = $true
         }
     }
     if (-not $startupWarn) { Add-ModuleData "startup" "ok" "No entries in Shell:Startup folders." }
+
     Advance "Scanning for alt accounts..."
     $launcherProfiles = @(
         @{ name="Lunar Client";   paths=@("$env:USERPROFILE\.lunarclient\settings\game\accounts.json") },
@@ -1412,6 +1359,7 @@ $btnScan.Add_Click({
         }
     }
     if (-not $altsFound) { Add-ModuleData "alts" "ok" "No launcher account files found." }
+
     Advance "Scanning for AnyDesk files..."
     $anyDeskWarn = $false; $adSeen = @{}
     foreach ($sp in @($env:USERPROFILE,"$env:USERPROFILE\Desktop","$env:USERPROFILE\Downloads","$env:USERPROFILE\Documents",$env:APPDATA,$env:LOCALAPPDATA,$env:TEMP)) {
@@ -1434,20 +1382,67 @@ $btnScan.Add_Click({
         } catch {}
     }
     if (-not $anyDeskWarn) { Add-ModuleData "anydesk" "ok" "No .anydesk files found." }
+
     Advance "Scanning browser history..."
     $bFound = Get-BrowserHistoryScan -bootTime $bootTime
     if (-not $bFound) { Add-ModuleData "browser" "ok" "No suspicious browser history found." }
     if ($bFound) { $findings++ }
+
     Advance "Scanning Minecraft memory..."
     if ($script:mcPid) {
         $mFound = Get-JavawMemoryScan -pIDProcess $script:mcPid
         if (-not $mFound) { Add-ModuleData "heap" "ok" "No suspicious strings in javaw memory." }
         if ($mFound) { $findings++ }
     } else { Add-ModuleData "heap" "warn" "Skipped - Minecraft not running." }
-    
+
     Advance "Detecting virtual machine..."
     $vmDetected = Get-VMDetection
     if ($vmDetected) { $findings++ }
+
+    Advance "Detecting mouse device..."
+    Get-MouseInfo
+
+    Advance "Enumerating Shell:Recent..."
+    $recentPath  = [System.Environment]::GetFolderPath("Recent")
+    $recentFiles = Get-ChildItem $recentPath -ErrorAction SilentlyContinue |
+                   Where-Object { $_.Extension -ne ".ini" -and $_.LastWriteTime -gt $bootTime } |
+                   Sort-Object LastWriteTime -Descending
+    if ($recentFiles) {
+        foreach ($rf in $recentFiles) {
+            Add-ModuleData "recent" "info" $rf.LastWriteTime.ToString('HH:mm:ss') "[FS] $($rf.BaseName)"
+        }
+    } else {
+        Add-ModuleData "recent" "ok" "No files in Shell:Recent (filesystem) since boot."
+    }
+    try {
+        $regRecent = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
+        $subKeys   = @("") + (Get-ChildItem $regRecent -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PSChildName)
+        foreach ($sub in $subKeys) {
+            $keyPath = if ($sub -eq "") { $regRecent } else { "$regRecent\$sub" }
+            $regKey  = Get-Item $keyPath -ErrorAction SilentlyContinue
+            if (-not $regKey) { continue }
+            $mruList = $regKey.GetValue("MRUListEx", $null)
+            if (-not $mruList -or $mruList.Count -lt 4) { continue }
+            $order = @()
+            for ($i = 0; $i -lt ($mruList.Count - 3); $i += 4) {
+                $idx = [BitConverter]::ToInt32($mruList, $i)
+                if ($idx -eq -1) { break }
+                $order += $idx
+            }
+            foreach ($idx in $order) {
+                $val = $regKey.GetValue($idx, $null)
+                if (-not $val) { continue }
+                try {
+                    $nameRaw = [System.Text.Encoding]::Unicode.GetString($val)
+                    $name    = ($nameRaw -split "`0")[0].Trim()
+                    if ($name -and $name.Length -gt 1) {
+                        $lbl = if ($sub -eq "") { "[REG] Root" } else { "[REG] $sub" }
+                        Add-ModuleData "recent" "info" $name $lbl
+                    }
+                } catch {}
+            }
+        }
+    } catch { Add-ModuleData "recent" "warn" "Could not read RecentDocs registry key." }
 
     Advance "Analyzing PowerShell History..."
     Get-PSHistoryScan
