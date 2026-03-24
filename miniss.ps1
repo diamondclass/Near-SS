@@ -66,7 +66,7 @@ $form.Controls.Add($lblTitle)
 $lblTitle.Location = New-Object System.Drawing.Point([int](($form.ClientSize.Width - $lblTitle.Width) / 2), 72)
 
 $lblSub = New-Object Windows.Forms.Label
-$lblSub.Text      = "by diamondclass  -  Version 1.0.0"
+$lblSub.Text      = "by diamondclass  -  Version 1.1.0"
 $lblSub.Font      = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
 $lblSub.ForeColor = $dimText
 $lblSub.BackColor = [System.Drawing.Color]::Transparent
@@ -193,7 +193,7 @@ $panelDone.Controls.Add($btnSSTool)
 
 $script:scanLog        = New-Object System.Text.StringBuilder
 $script:reportPath     = ""
-$script:totalSteps     = 22
+$script:totalSteps     = 25
 $script:step           = 0
 $script:mcInfoGlobal   = @{ running=$false; version="Unknown"; client="Unknown"; memory=""; threads=0; startTime=""; jvmArgs=""; mods=@() }
 $script:moduleResults  = @{}
@@ -278,8 +278,7 @@ function Get-VMDetection {
 function Get-MouseInfo {
     $found = $false
     try {
-        $devices = Get-WmiObject Win32_PointingDevice -ErrorAction Stop |
-                   Where-Object { $_.Name -notmatch "(?i)virtual|remote|touchpad|trackpad|vmware|vbox" }
+        $devices = Get-WmiObject Win32_PointingDevice -ErrorAction Stop | Where-Object { $_.Name -notmatch "(?i)virtual|remote|touchpad|trackpad|vmware|vbox" }
         foreach ($d in $devices) {
             $hwid  = $d.PNPDeviceID
             $brand = "Unknown"
@@ -345,8 +344,7 @@ function Get-MouseInfo {
 
     if (-not $found) {
         try {
-            $pnp = Get-PnpDevice -Class Mouse -Status OK -ErrorAction Stop |
-                   Where-Object { $_.FriendlyName -notmatch "(?i)virtual|HID-compliant|remote|vbox|vmware" }
+            $pnp = Get-PnpDevice -Class Mouse -Status OK -ErrorAction Stop | Where-Object { $_.FriendlyName -notmatch "(?i)virtual|HID-compliant|remote|vbox|vmware" }
             foreach ($p in $pnp) {
                 Add-ModuleData "mouse" "info" $p.FriendlyName "PnP"
                 $found = $true
@@ -377,10 +375,7 @@ function Get-MouseInfo {
 function Get-BootTime {
     $result = $null
     try {
-        $logonEvent = Get-WinEvent -FilterHashtable @{ LogName='Winlogon'; Id=6003 } -MaxEvents 100 -ErrorAction Stop |
-            Where-Object { $_.Properties.Count -gt 8 -and ($_.Properties[8].Value -eq 2 -or $_.Properties[8].Value -eq 10 -or $_.Properties[8].Value -eq 11) } |
-            Where-Object { $_.Properties.Count -gt 5 -and $_.Properties[5].Value -eq [System.Environment]::UserName } |
-            Sort-Object TimeCreated -Descending | Select-Object -First 1
+        $logonEvent = Get-WinEvent -FilterHashtable @{ LogName='Winlogon'; Id=6003 } -MaxEvents 100 -ErrorAction Stop | Where-Object { $_.Properties.Count -gt 8 -and ($_.Properties[8].Value -eq 2 -or $_.Properties[8].Value -eq 10 -or $_.Properties[8].Value -eq 11) } | Where-Object { $_.Properties.Count -gt 5 -and $_.Properties[5].Value -eq [System.Environment]::UserName } | Sort-Object TimeCreated -Descending | Select-Object -First 1
         if ($logonEvent) { $result = $logonEvent.TimeCreated }
     } catch {}
     if ($result -eq $null) {
@@ -408,8 +403,7 @@ function Get-BrowserHistoryScan {
     )
     $ffBase = "$env:APPDATA\Mozilla\Firefox\Profiles"
     if (Test-Path $ffBase) {
-        $ffProfile = Get-ChildItem $ffBase -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } |
-                     Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        $ffProfile = Get-ChildItem $ffBase -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($ffProfile) { $browsers[4].path = "$($ffProfile.FullName)\places.sqlite" }
     }
     foreach ($browser in $browsers) {
@@ -600,39 +594,42 @@ function Export-HtmlReport {
     }
 
     $moduleIds = @(
-        @{id="s01";num="01";title="Services"},
-        @{id="s02";num="02";title="DNS Cache"},
-        @{id="s03";num="03";title="USB History"},
-        @{id="s04";num="04";title="BAM Logs"},
-        @{id="s05";num="05";title="Hosts File"},
-        @{id="s06";num="06";title="Suspicious Apps"},
-        @{id="s07";num="07";title="Prefetch"},
-        @{id="s08";num="08";title="Recording Software"},
-        @{id="s09";num="09";title="Mod Times"},
-        @{id="s10";num="10";title="JNativeHook"},
-        @{id="s11";num="11";title="Exec + Deleted"},
-        @{id="s12";num="12";title="Minecraft"},
-        @{id="s13";num="13";title="In-Instance"},
-        @{id="s14";num="14";title="Out-of-Instance"},
-        @{id="s15";num="15";title="Startup"},
-        @{id="s16";num="16";title="Alt Accounts"},
-        @{id="s17";num="17";title="AnyDesk"},
-        @{id="s18";num="18";title="Browser History"},
-        @{id="s19";num="19";title="Heap Strings"},
-        @{id="s20";num="20";title="VM Detection"},
-        @{id="s21";num="21";title="Mouse Device"},
-        @{id="s22";num="22";title="Shell:Recent"},
-        @{id="s23";num="23";title="PS Command History"}
+        @{id="s01";title="Services"},
+        @{id="s02";title="DNS Cache"},
+        @{id="s03";title="USB History"},
+        @{id="s04";title="BAM Logs"},
+        @{id="s05";title="Hosts File"},
+        @{id="s06";title="Suspicious Apps"},
+        @{id="s07";title="Prefetch"},
+        @{id="s08";title="Recording Software"},
+        @{id="s09";title="Mod Times"},
+        @{id="s10";title="JNativeHook"},
+        @{id="s11";title="Exec + Deleted"},
+        @{id="s12";title="Minecraft"},
+        @{id="s13";title="In-Instance"},
+        @{id="s14";title="Out-of-Instance"},
+        @{id="s15";title="Startup"},
+        @{id="s16";title="Alt Accounts"},
+        @{id="s17";title="AnyDesk"},
+        @{id="s18";title="Browser History"},
+        @{id="s19";title="Heap Strings"},
+        @{id="s20";title="VM Detection"},
+        @{id="s21";title="Mouse Device"},
+        @{id="s22";title="Shell:Recent"},
+        @{id="s23";title="PS Command History"},
+        @{id="s24";title="DisallowRun"},
+        @{id="s25";title="Deleted BAM Keys"}
     )
 
     $moduleKeys = @(
         "services","dns","usb","bam","hosts","apps","prefetch","recording",
         "modtimes","jnative","execdel","minecraft","ininst","outinst",
-        "startup","alts","anydesk","browser","heap","vm","mouse","recent","pshistory"
+        "startup","alts","anydesk","browser","heap","vm","mouse","recent","pshistory","disallowrun","delbam"
     )
 
     $cardsHtml    = ""
     $sidebarLinks = ""
+    $displayNum   = 1
 
     for ($i = 0; $i -lt $moduleIds.Count; $i++) {
         $mod   = $moduleIds[$i]
@@ -642,11 +639,17 @@ function Export-HtmlReport {
         $hasHit  = $items | Where-Object { $_.type -eq "hit" }
         $hasWarn = $items | Where-Object { $_.type -eq "warn" }
 
+        if (-not $hasHit -and -not $hasWarn -and $key -ne "minecraft" -and $key -ne "pshistory" -and $key -ne "recent") {
+            continue
+        }
+
         if ($hasHit)      { $sc="#ff4040"; $sl="HIT";  $sbClass="hit"  }
         elseif ($hasWarn) { $sc="#ff9820"; $sl="WARN"; $sbClass="warn" }
         else              { $sc="#1ec870"; $sl="OK";   $sbClass="ok"   }
 
+        $numStr = $displayNum.ToString("D2")
         $rowsHtml = ""
+        
         if ($items.Count -eq 0) {
             $rowsHtml = "<div class=`"row row-ok`"><span class=`"pill pill-ok`">OK</span><span class=`"row-msg`">No findings.</span></div>"
         } else {
@@ -671,11 +674,13 @@ function Export-HtmlReport {
             $entryCount  = $items.Count
             $countLabel  = if ($entryCount -eq 1) { "1 entrada" } else { "$entryCount entradas" }
             $placeholder = "<div class=`"expand-placeholder`"><div class=`"expand-placeholder-info`"><span class=`"expand-placeholder-count`">$countLabel</span><span class=`"expand-placeholder-hint`">Contenido oculto por privacidad</span></div><button class=`"expand-btn`" onclick=`"openModal('$($mod.id)','$($mod.title)')`">Mostrar completo</button></div>"
-            $cardsHtml += "<div class=`"mod-card expandable`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$($mod.num)</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body-hidden`" aria-hidden=`"true`">$rowsHtml</div>$placeholder</div>`n"
+            $cardsHtml += "<div class=`"mod-card expandable`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$numStr</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body-hidden`" aria-hidden=`"true`">$rowsHtml</div>$placeholder</div>`n"
         } else {
-            $cardsHtml += "<div class=`"mod-card`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$($mod.num)</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body`">$rowsHtml</div></div>`n"
+            $cardsHtml += "<div class=`"mod-card`" id=`"$($mod.id)`"><div class=`"mod-hdr`"><span class=`"mod-num`">$numStr</span><span class=`"mod-title`">$($mod.title)</span><span class=`"mod-badge`" style=`"color:$sc;border-color:${sc}30;background:${sc}10`">$sl</span></div><div class=`"mod-body`">$rowsHtml</div></div>`n"
         }
-        $sidebarLinks += "<a class=`"sb-link $sbClass`" onclick=`"scrollTo('$($mod.id)')`"><div class=`"sb-num`">$($mod.num)</div>$($mod.title)</a>`n"
+        $sidebarLinks += "<a class=`"sb-link $sbClass`" onclick=`"scrollTo('$($mod.id)')`"><div class=`"sb-num`">$numStr</div>$($mod.title)</a>`n"
+        
+        $displayNum++
     }
 
     return @"
@@ -984,7 +989,7 @@ $btnScan.Add_Click({
 
     function Advance($msg) {
         $script:step++
-        $pct  = [Math]::Min(100,[int](($script:step / 22) * 100))
+        $pct  = [Math]::Min(100,[int](($script:step / 25) * 100))
         $progressBar.Width = [int](400 * $pct / 100)
         $lblStep.Text = $msg
         $lblPct.Text  = "$pct%"
@@ -1100,9 +1105,35 @@ $btnScan.Add_Click({
     }
     if (-not $bamWarn) { Add-ModuleData "bam" "ok" "No flagged executables in BAM logs." }
 
+    Advance "Checking Deleted BAM Keys..."
+    $delBamWarn = $false
+    $userSIDs = Get-ChildItem "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings" -ErrorAction SilentlyContinue
+    foreach ($sid in $userSIDs) {
+        $key = Get-Item $sid.PSPath -ErrorAction SilentlyContinue
+        if (-not $key) { continue }
+        foreach ($valName in $key.GetValueNames()) {
+            if ($valName -match "^\\Device\\HarddiskVolume\d+\\(.*)") {
+                $drivePath = "C:\" + $matches[1]
+                if (-not (Test-Path $drivePath -ErrorAction SilentlyContinue)) {
+                    $binaryData = $key.GetValue($valName)
+                    if ($binaryData -and $binaryData.Count -ge 8) {
+                        $execTime = [DateTime]::FromFileTime([BitConverter]::ToInt64($binaryData,0))
+                        if ($execTime -gt $bootTime) {
+                            Add-ModuleData "delbam" "hit" "Deleted: $valName  [$($execTime.ToString('HH:mm:ss'))]  THIS SESSION"
+                            $findings++
+                        } else {
+                            Add-ModuleData "delbam" "warn" "Deleted: $valName  [$($execTime.ToString('yyyy-MM-dd HH:mm'))]  pre-boot"
+                        }
+                        $delBamWarn = $true
+                    }
+                }
+            }
+        }
+    }
+    if (-not $delBamWarn) { Add-ModuleData "delbam" "ok" "No deleted BAM entries found." }
+
     Advance "Checking hosts file..."
-    $hostsEntries = Get-Content "C:\Windows\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue |
-                    Where-Object { $_ -notlike "#*" -and $_ -match "\S" }
+    $hostsEntries = Get-Content "C:\Windows\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue | Where-Object { $_ -notlike "#*" -and $_ -match "\S" }
     if ($hostsEntries) {
         foreach ($l in $hostsEntries) { Add-ModuleData "hosts" "warn" $l }
         $findings++
@@ -1216,9 +1247,7 @@ $btnScan.Add_Click({
     foreach ($tp in @($env:LOCALAPPDATA + "\Temp", $env:TEMP) | Sort-Object -Unique) {
         if (-not (Test-Path $tp)) { continue }
         foreach ($pat in $jPatterns) {
-            Get-ChildItem $tp -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -like $pat -and $_.Extension -match "\.(dll|jar|so)$" } |
-            ForEach-Object {
+            Get-ChildItem $tp -ErrorAction SilentlyContinue | Where-Object { $_.Name -like $pat -and $_.Extension -match "\.(dll|jar|so)$" } | ForEach-Object {
                 if ($jSeen.ContainsKey($_.FullName)) { return }
                 $jSeen[$_.FullName] = $true
                 $ts = $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')
@@ -1269,8 +1298,7 @@ $btnScan.Add_Click({
         }
     } else {
         $script:mcInfoGlobal = @{ running=$false; version="N/A"; client="N/A"; memory="N/A"; threads=0; startTime="N/A"; jvmArgs=""; mods=@() }
-        Add-ModuleData "minecraft" "warn" "No javaw.exe found. Minecraft not running."
-    }
+        Add-ModuleData "minecraft" "warn" "No javaw.exe found. Minecraft not running." }
 
     Advance "Running in-instance checks..."
     if ($script:mcPid) {
@@ -1365,9 +1393,7 @@ $btnScan.Add_Click({
     foreach ($sp in @($env:USERPROFILE,"$env:USERPROFILE\Desktop","$env:USERPROFILE\Downloads","$env:USERPROFILE\Documents",$env:APPDATA,$env:LOCALAPPDATA,$env:TEMP)) {
         if (-not (Test-Path $sp)) { continue }
         try {
-            Get-ChildItem $sp -ErrorAction SilentlyContinue |
-            Where-Object { -not $_.PSIsContainer -and $_.Extension -eq ".anydesk" } |
-            ForEach-Object {
+            Get-ChildItem $sp -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer -and $_.Extension -eq ".anydesk" } | ForEach-Object {
                 if ($adSeen.ContainsKey($_.FullName)) { return }
                 $adSeen[$_.FullName] = $true
                 $ts = $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')
@@ -1404,16 +1430,13 @@ $btnScan.Add_Click({
 
     Advance "Enumerating Shell:Recent..."
     $recentPath  = [System.Environment]::GetFolderPath("Recent")
-    $recentFiles = Get-ChildItem $recentPath -ErrorAction SilentlyContinue |
-                   Where-Object { $_.Extension -ne ".ini" -and $_.LastWriteTime -gt $bootTime } |
-                   Sort-Object LastWriteTime -Descending
+    $recentFiles = Get-ChildItem $recentPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -ne ".ini" -and $_.LastWriteTime -gt $bootTime } | Sort-Object LastWriteTime -Descending
     if ($recentFiles) {
         foreach ($rf in $recentFiles) {
             Add-ModuleData "recent" "info" $rf.LastWriteTime.ToString('HH:mm:ss') "[FS] $($rf.BaseName)"
         }
     } else {
-        Add-ModuleData "recent" "ok" "No files in Shell:Recent (filesystem) since boot."
-    }
+        Add-ModuleData "recent" "ok" "No files in Shell:Recent (filesystem) since boot." }
     try {
         $regRecent = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
         $subKeys   = @("") + (Get-ChildItem $regRecent -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PSChildName)
@@ -1446,6 +1469,27 @@ $btnScan.Add_Click({
 
     Advance "Analyzing PowerShell History..."
     Get-PSHistoryScan
+
+    Advance "Checking DisallowRun..."
+    $drRegPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun"
+    $drKeyExists = Test-Path $drRegPath -ErrorAction SilentlyContinue
+    if ($drKeyExists) {
+        try {
+            $drKey    = Get-Item $drRegPath -ErrorAction Stop
+            $drValues = $drKey.GetValueNames() | Where-Object { $_ -ne "" }
+            if ($drValues -and $drValues.Count -gt 0) {
+                foreach ($drVal in $drValues) {
+                    $blocked = $drKey.GetValue($drVal, "")
+                    Add-ModuleData "disallowrun" "warn" $blocked "Blocked (Explorer)"
+                }
+                Add-ModuleData "disallowrun" "hit" "$($drValues.Count) program(s) blocked via DisallowRun - Explorer restart required to apply"
+                $findings++
+            } else {
+                Add-ModuleData "disallowrun" "ok" "DisallowRun key exists but no entries found." }
+        } catch {
+            Add-ModuleData "disallowrun" "ok" "DisallowRun key could not be read." }
+    } else {
+        Add-ModuleData "disallowrun" "ok" "DisallowRun not configured." }
 
     $elapsed = ((Get-Date) - $scanStart).TotalSeconds
     $lblStep.Text = "Generating report..."
