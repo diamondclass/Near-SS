@@ -1358,16 +1358,24 @@ $btnScan.Add_Click({
 
     Advance "Scanning for alt accounts..."
     $launcherProfiles = @(
-        @{ name="Lunar Client";   paths=@("$env:USERPROFILE\.lunarclient\settings\game\accounts.json") },
-        @{ name="Badlion Client"; paths=@("$env:APPDATA\.badlion\accounts.json","$env:APPDATA\Badlion Client\accounts.json") },
+        @{ name="Lunar Client";                 paths=@("$env:USERPROFILE\.lunarclient\settings\game\accounts.json", "$env:USERPROFILE\.lunarclient\settings\game-backup", "$env:USERPROFILE\.lunarclient\settings\game") },
+        @{ name="ViaFabricPlus (Vanilla)";      paths=@("$env:APPDATA\.minecraft\config\viafabricplus") },
+        @{ name="Stitch";                       paths=@("$env:APPDATA\.minecraft\Stitch") },
+        @{ name="LiquidBounce";                 paths=@("$env:APPDATA\CCBlueX\LiquidLauncher\data\gameDir\legacy\LiquidBounce-1.8.9", "$env:APPDATA\CCBlueX\LiquidLauncher\data\gameDir\nextgen\LiquidBounce") },
+        @{ name="LiquidBounce (ViaFabricPlus)"; paths=@("$env:APPDATA\CCBlueX\LiquidLauncher\data\gameDir\nextgen\config\viafabricplus") },
+        @{ name="Augustus Client";              paths=@("$env:APPDATA\ElectricLauncher\data\data\augustus\augustus\settings") },
+        @{ name="CurseForge";                   paths=@("$env:USERPROFILE\curseforge\minecraft\Install") },
+        @{ name="Windows Recent";               paths=@("$env:APPDATA\Microsoft\Windows\Recent") },
+        @{ name="Badlion Client"; paths=@("$env:APPDATA\.badlion\accounts.json", "$env:APPDATA\Badlion Client\accounts.json") },
         @{ name="Feather Client"; paths=@("$env:APPDATA\FeatherClient\accounts.json") },
         @{ name="LabyMod";        paths=@("$env:APPDATA\.minecraft\LabyMod\accounts.json") },
         @{ name="Prism Launcher"; paths=@("$env:APPDATA\PrismLauncher\accounts.json") },
         @{ name="MultiMC";        paths=@("$env:APPDATA\MultiMC\accounts.json") },
         @{ name="PolyMC";         paths=@("$env:APPDATA\PolyMC\accounts.json") },
-        @{ name="Modrinth";       paths=@("$env:APPDATA\com.modrinth.theseus\profiles.json") },
+        @{ name="Modrinth (Main)";              paths=@("$env:APPDATA\com.modrinth.theseus\profiles.json") },
+        @{ name="Modrinth (Sodium/ViaFabric)";  paths=@("$env:APPDATA\ModrinthApp\profiles\Sodium Plus\config\viafabricplus") },
         @{ name="Meteor Client";  paths=@("$env:APPDATA\.minecraft\meteor-client\accounts.json") },
-        @{ name="Vanilla";        paths=@("$env:APPDATA\.minecraft\launcher_accounts.json","$env:APPDATA\.minecraft\launcher_profiles.json") }
+        @{ name="Vanilla";        paths=@("$env:APPDATA\.minecraft\launcher_accounts.json", "$env:APPDATA\.minecraft\launcher_profiles.json", "$env:APPDATA\.minecraft") }
     )
     $altsFound = $false
     foreach ($launcher in $launcherProfiles) {
