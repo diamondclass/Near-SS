@@ -1549,7 +1549,7 @@ $btnSSTool.Add_Click({
         if (Test-Path $outPath) { Remove-Item $outPath -Force }
         $wcSS = New-Object System.Net.WebClient
         $wcSS.Headers.Add("User-Agent","Mozilla/5.0")
-        $wcSS.DownloadFile("https://github.com/Orbdiff/SSTool/releases/download/tool/SSTool.exe",$outPath)
+        $wcSS.DownloadFile("https://github.com/Orbdiff/SSTool/releases/download/update/SSTool.exe",$outPath)
         if (Test-Path $outPath) { Start-Process $outPath; $btnSSTool.Text = "Launched!" }
         else { $btnSSTool.Text = "Failed" }
     } catch { $btnSSTool.Text = "Error" }
