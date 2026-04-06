@@ -1066,7 +1066,7 @@ $btnScan.Add_Click({
     $bamFlags = @("autoclicker","SystemInformer","processhacker","vape","drip","doomsday",
                   "inject","hook","sigma","wurst","meteor","rise","rusherhack","lambda",
                   "registry.exe","clicker","Nvidia Control Panel","slinky","fileless",
-                  "exodus","slinkyhook","jitter","butterfly","autoclick","clicking",
+                  "exodus","slinkyloader","jitter","butterfly","autoclick","clicking",
                   "sparkcrack","striker","monolith","unicorn client","uwu client",
                   "sapphire","lithiumclient","dream-injector","Registry Cleaner","Wise",
                   "ccleaner","bleachbit","privazer","glary","auslogics","advancedsystemcare",
@@ -1162,7 +1162,7 @@ $btnScan.Add_Click({
 
     Advance "Reading prefetch..."
     $pfTargets = $targetApps + @("SparkCrack","Striker","autoclicker","autoclick","jitter","butterfly",
-                                  "slinkyhook","slinky","exodus","vape","drip","dreaminjector","monolith",
+                                  "slinkyloader","slinky","exodus","vape","drip","dreaminjector","monolith",
                                   "unicorn","uwuclient","sapphire","lithium","stringcleaner","ghostclient",
                                   "nitrobrew","reflexclient","crystalclient","blevclient","exitus",
                                   "peinjector","xanon","zerodayclient","SystemInformer","ProcessHacker",
